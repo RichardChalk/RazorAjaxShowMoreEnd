@@ -27,7 +27,32 @@ namespace RazorAjax3UseCasesEnd.Pages.Person
             public string Fuel { get; set; }
             public DateTime BoughtDate { get; set; }
         }
-        public List<Car> Cars { get; set; } = new List<Car>();
+
+        public IActionResult OnGetShowMore(int personId, long lastTicks)
+        {
+            DateTime dateOfLastShown = new DateTime(lastTicks).AddMilliseconds(100);
+
+            var listOfCars = _dbContext.Person
+                .Where(e => e.Id == personId)
+                .SelectMany(e => e.OwnedCars)
+                .Where(d => lastTicks == 0 || d.BoughtDate > dateOfLastShown)
+                .OrderBy(e => e.BoughtDate)
+                .Take(5)
+                .Select(c => new Car
+                {
+                    BoughtDate = c.BoughtDate,
+                    Id = c.Id,
+                    Model = c.Model,
+                    Fuel = c.Fuel,
+                    Manufacturer = c.Manufacturer,
+                    Type = c.Type,
+                    Vin = c.Vin
+                }).ToList();
+
+            if (listOfCars.Any())
+                lastTicks = listOfCars.Last().BoughtDate.Ticks;
+            return new JsonResult(new { cars = listOfCars, lastTicks });
+        }
 
         public IActionResult OnGetFetchValue(int id)
         {
@@ -41,20 +66,9 @@ namespace RazorAjax3UseCasesEnd.Pages.Person
         public void OnGet(int personId)
         {
             var person = _dbContext.Person
-                .Include(e => e.OwnedCars)
                 .First(person => person.Id == personId);
             Id = personId;
             Name = person.Name;
-            Cars = person.OwnedCars.Select(e => new Car
-            {
-                BoughtDate = e.BoughtDate,
-                Id = e.Id,
-                Model = e.Model,
-                Fuel = e.Fuel,
-                Manufacturer = e.Manufacturer,
-                Type = e.Type,
-                Vin = e.Vin
-            }).ToList();
         }
     }
 }
