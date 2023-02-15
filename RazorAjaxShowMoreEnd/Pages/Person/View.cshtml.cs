@@ -30,13 +30,14 @@ namespace RazorAjax3UseCasesEnd.Pages.Person
 
         public IActionResult OnGetShowMore(int personId, long lastTicks)
         {
-            DateTime dateOfLastShown = new DateTime(lastTicks).AddMilliseconds(100);
+            DateTime dateOfLastShown = new DateTime(lastTicks)
+                .AddMilliseconds(100);
 
             var listOfCars = _dbContext.Person
-                .Where(e => e.Id == personId)
-                .SelectMany(e => e.OwnedCars)
-                .Where(d => lastTicks == 0 || d.BoughtDate > dateOfLastShown)
-                .OrderBy(e => e.BoughtDate)
+                .Where(p => p.Id == personId)
+                .SelectMany(p => p.OwnedCars)
+                .Where(ca => lastTicks == 0 || ca.BoughtDate > dateOfLastShown)
+                .OrderBy(ca => ca.BoughtDate)
                 .Take(5)
                 .Select(c => new Car
                 {
