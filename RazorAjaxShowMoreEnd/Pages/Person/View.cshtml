@@ -47,7 +47,7 @@
                     <td>${element.model}</td>
                     <td>${element.type}</td>
                     <td>${element.fuel}</td>
-                    <td>${element.boughtDate}</td>
+                    <td>${new Date(element.boughtDate).toLocaleDateString()}</td> 
                     <td>
                         <a class="btn" onclick="fetchEvaluation(${element.id}, this)">
                         Show Value</a>
